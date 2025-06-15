@@ -20,6 +20,7 @@ public class ConsumerController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> consumeRecord() {
         return reactiveKafkaConsumerTemplate.receive()
+                .doOnSubscribe(s -> log.info("Subscribed to Kafka consumer"))
                 .map(record -> {
                     String message = record.value();
                     record.receiverOffset().acknowledge();
