@@ -12,6 +12,7 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
+    "bootstrap": "^5.3.6",
     "pretty-print-json": "^3.0.4"
   }
 }

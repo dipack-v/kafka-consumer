@@ -1,6 +1,6 @@
 kafka:
-  bootstrap-servers: microqa02-confluent-01.655478980367.aws.env.site:9093,microqa02-confluent-02.655478980367.aws.env.site:9093,microqa02-confluent-03.655478980367.aws.env.site:9093
+  bootstrap-servers: localhost:9092
   consumer:
-    group-id: streams-app
-    properties: 
-     max.request.size: 3000000
+    group-id: kafka_consumer_app
+    topics:
+      - events
