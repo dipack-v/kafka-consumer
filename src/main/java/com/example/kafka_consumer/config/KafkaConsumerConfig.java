@@ -53,18 +53,10 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
-
+    @Bean
     private ReceiverOptions<String, String> receiverOptions() {
         Map<String, Object> consumerConfig = consumerConfig();
-        ReceiverOptions<String, String> receiverOptions = ReceiverOptions.create(consumerConfig);
-        return receiverOptions.subscription(kafkaClusterProperties.getConsumer().getTopics())
-
-                .addAssignListener(partitions -> {
-                    log.info("Partitions assigned: {}", partitions);
-                })
-                .addRevokeListener(partitions -> {
-                    log.info("Partitions revoked: {}", partitions);
-                });
+        return ReceiverOptions.create(consumerConfig);
     }
 
     @Bean
