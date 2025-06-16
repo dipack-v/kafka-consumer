@@ -44,7 +44,7 @@ connectButton.addEventListener('click', () => {
     }
 
     // Initialize the EventSource, listening for server updates.
-    eventSource = new EventSource('http://localhost:8084/stream');
+    eventSource = new EventSource('http://localhost:8084/stream/'+ dropdown.value);
 
     // Listen for messages from the server.
     eventSource.onmessage = function (event) {
