@@ -8,8 +8,11 @@ import org.springframework.http.MediaType;
 import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.kafka.receiver.KafkaReceiver;
+import reactor.kafka.receiver.ReceiverOptions;
 import reactor.kafka.receiver.ReceiverRecord;
 
 import java.util.List;
@@ -19,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ConsumerController {
     private final KafkaClusterProperties kafkaClusterProperties;
-    private final ReactiveKafkaConsumerTemplate<String, String> reactiveKafkaConsumerTemplate;
+    private final ReceiverOptions<String, String> receiverOptions;
 
     @CrossOrigin(origins = "http://localhost:5173/")
     @GetMapping(value = "/topics")
@@ -28,9 +31,16 @@ public class ConsumerController {
     }
 
     @CrossOrigin(origins = "http://localhost:5173/")
-    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> consumeRecord() {
-        return reactiveKafkaConsumerTemplate.receive()
+    @GetMapping(value = "/stream/{topic}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> consumeRecord(@PathVariable(value="topic") String topic) {
+        log.info("Consuming topic: {}", topic);
+        ReceiverOptions<String, String> options = receiverOptions.subscription(Collections.singleton(topic))
+                .addAssignListener(partitions -> log.debug("onPartitionsAssigned {}", partitions))
+                .addRevokeListener(partitions -> log.debug("onPartitionsRevoked {}", partitions));
+
+        Flux<ReceiverRecord<String, String>> kafkaFlux = KafkaReceiver.create(options).receive();
+
+        return kafkaFlux
                 .doOnSubscribe(s -> log.info("Subscribed to Kafka consumer"))
                 .map(record -> {
                     String message = record.value();
